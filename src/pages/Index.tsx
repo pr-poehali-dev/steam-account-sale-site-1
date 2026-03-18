@@ -19,6 +19,8 @@ const accounts = [
     badge: "ТОП",
     discount: 35,
     image: CARD_IMAGE,
+    login: "pro_gamer_x_2019",
+    password: "Qw3rty!9821",
   },
   {
     id: 2,
@@ -34,6 +36,8 @@ const accounts = [
     badge: "ХИТ",
     discount: 32,
     image: CARD_IMAGE,
+    login: "shadow_master54",
+    password: "Sh4d0w#Master",
   },
   {
     id: 3,
@@ -49,6 +53,8 @@ const accounts = [
     badge: null,
     discount: null,
     image: CARD_IMAGE,
+    login: "night_crawler33",
+    password: "N1ght$Cr4wl",
   },
   {
     id: 4,
@@ -64,6 +70,8 @@ const accounts = [
     badge: "RARE",
     discount: 32,
     image: CARD_IMAGE,
+    login: "elite_force_142",
+    password: "3l1te!F0rce#",
   },
   {
     id: 5,
@@ -79,6 +87,8 @@ const accounts = [
     badge: "НОВЫЙ",
     discount: null,
     image: CARD_IMAGE,
+    login: "steel_walker21",
+    password: "St33l@Walk3r",
   },
   {
     id: 6,
@@ -94,6 +104,8 @@ const accounts = [
     badge: "🔥",
     discount: 26,
     image: CARD_IMAGE,
+    login: "cyber_phantom68",
+    password: "Cyb3r#Ph4ntom",
   },
 ];
 
@@ -118,6 +130,10 @@ export default function Index() {
   const [userEmail, setUserEmail] = useState("gamer@example.com");
   const [checkingAccount, setCheckingAccount] = useState<null | number>(null);
   const [checkedAccounts, setCheckedAccounts] = useState<number[]>([]);
+  const [purchasedIds, setPurchasedIds] = useState<number[]>([]);
+  const [showCredentials, setShowCredentials] = useState<null | (typeof accounts)[0]>(null);
+  const [revealedPasswords, setRevealedPasswords] = useState<number[]>([]);
+  const [orderSuccess, setOrderSuccess] = useState(false);
 
   const filteredAccounts = accounts.filter((a) => {
     const inPrice = a.price >= priceFilter[0] && a.price <= priceFilter[1];
@@ -314,7 +330,20 @@ export default function Index() {
                   <span className="text-gray-400 text-sm">Итого</span>
                   <span className="price-tag text-xl">{cartFinal.toLocaleString()} ₽</span>
                 </div>
-                <button className="w-full py-3 rounded-xl neon-btn text-sm">
+                <button
+                  className="w-full py-3 rounded-xl neon-btn text-sm"
+                  onClick={() => {
+                    setPurchasedIds((prev) => [...new Set([...prev, ...cartItems])]);
+                    setCartItems([]);
+                    setCartOpen(false);
+                    setOrderSuccess(true);
+                    setPromoCode("");
+                    setPromoApplied(false);
+                    setPromoDiscount(0);
+                    setActiveNav("Личный кабинет");
+                    setActivePage("profile");
+                  }}
+                >
                   Оформить заказ
                 </button>
               </div>
@@ -730,9 +759,25 @@ export default function Index() {
               </div>
             </div>
             <div className="md:col-span-2 space-y-4">
+              {/* Уведомление об успешной покупке */}
+              {orderSuccess && (
+                <div
+                  className="flex items-center gap-3 p-4 rounded-2xl"
+                  style={{ background: "rgba(0,255,136,0.08)", border: "1px solid rgba(0,255,136,0.3)" }}
+                >
+                  <Icon name="CheckCircle" size={20} className="text-green-400 flex-shrink-0" />
+                  <div>
+                    <p className="font-rajdhani font-bold text-green-400 text-sm">Заказ оформлен!</p>
+                    <p className="text-gray-400 text-xs">Данные для входа доступны ниже</p>
+                  </div>
+                  <button onClick={() => setOrderSuccess(false)} className="ml-auto text-gray-600 hover:text-white">
+                    <Icon name="X" size={14} />
+                  </button>
+                </div>
+              )}
               <div className="rounded-2xl p-6" style={{ background: "var(--dark-card)", border: "1px solid rgba(0,212,255,0.1)" }}>
-                <h3 className="font-rajdhani font-bold text-lg text-white mb-4">Моя корзина</h3>
-                {cartAccounts.length === 0 ? (
+                <h3 className="font-rajdhani font-bold text-lg text-white mb-4">Мои покупки</h3>
+                {purchasedIds.length === 0 ? (
                   <div className="text-center py-8">
                     <Icon name="PackageX" size={36} className="text-gray-700 mx-auto mb-3" />
                     <p className="text-gray-600 font-rajdhani text-sm uppercase tracking-wide">Покупок пока нет</p>
@@ -745,18 +790,84 @@ export default function Index() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {cartAccounts.map((a) => (
+                    {accounts.filter((a) => purchasedIds.includes(a.id)).map((a) => (
                       <div
                         key={a.id}
-                        className="flex items-center gap-4 p-4 rounded-xl"
-                        style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.1)" }}
+                        className="rounded-xl overflow-hidden"
+                        style={{ border: "1px solid rgba(0,212,255,0.15)" }}
                       >
-                        <div className="flex-1">
-                          <p className="font-rajdhani font-bold text-white">{a.name}</p>
-                          <p className="text-gray-500 text-xs">Ур. {a.level} · {a.games} игр</p>
+                        {/* Заголовок карточки */}
+                        <div
+                          className="flex items-center gap-4 p-4"
+                          style={{ background: "rgba(0,212,255,0.04)" }}
+                        >
+                          <div className="flex-1">
+                            <p className="font-rajdhani font-bold text-white">{a.name}</p>
+                            <p className="text-gray-500 text-xs">Ур. {a.level} · {a.games} игр</p>
+                          </div>
+                          <span className="verified-badge px-2 py-1 rounded-full text-xs">Куплен</span>
+                          <button
+                            onClick={() => setShowCredentials(showCredentials?.id === a.id ? null : a)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-rajdhani font-bold transition-all"
+                            style={{
+                              background: showCredentials?.id === a.id ? "rgba(0,212,255,0.15)" : "rgba(0,212,255,0.06)",
+                              border: "1px solid rgba(0,212,255,0.25)",
+                              color: "var(--neon-cyan)",
+                            }}
+                          >
+                            <Icon name={showCredentials?.id === a.id ? "EyeOff" : "Eye"} size={12} />
+                            {showCredentials?.id === a.id ? "Скрыть" : "Данные"}
+                          </button>
                         </div>
-                        <span className="price-tag">{a.price.toLocaleString()} ₽</span>
-                        <span className="verified-badge px-2 py-1 rounded-full text-xs">В корзине</span>
+                        {/* Логин и пароль */}
+                        {showCredentials?.id === a.id && (
+                          <div className="p-4 space-y-3" style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(0,212,255,0.1)" }}>
+                            <div>
+                              <label className="text-gray-500 text-xs font-rajdhani uppercase tracking-widest block mb-1">Логин</label>
+                              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+                                style={{ background: "rgba(0,212,255,0.06)", border: "1px solid rgba(0,212,255,0.2)" }}>
+                                <Icon name="User" size={14} className="text-cyan-400 flex-shrink-0" />
+                                <span className="font-rajdhani font-bold text-white text-sm flex-1 tracking-wide">{a.login}</span>
+                                <button
+                                  onClick={() => navigator.clipboard?.writeText(a.login)}
+                                  className="text-gray-500 hover:text-cyan-400 transition-colors"
+                                  title="Скопировать"
+                                >
+                                  <Icon name="Copy" size={13} />
+                                </button>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-gray-500 text-xs font-rajdhani uppercase tracking-widest block mb-1">Пароль</label>
+                              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+                                style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.2)" }}>
+                                <Icon name="Lock" size={14} className="text-purple-400 flex-shrink-0" />
+                                <span className="font-rajdhani font-bold flex-1 text-sm tracking-wider"
+                                  style={{ color: revealedPasswords.includes(a.id) ? "white" : "transparent", textShadow: revealedPasswords.includes(a.id) ? "none" : "0 0 8px rgba(255,255,255,0.5)" }}>
+                                  {a.password}
+                                </span>
+                                <button
+                                  onClick={() => setRevealedPasswords((prev) => prev.includes(a.id) ? prev.filter((i) => i !== a.id) : [...prev, a.id])}
+                                  className="text-gray-500 hover:text-purple-400 transition-colors"
+                                  title={revealedPasswords.includes(a.id) ? "Скрыть" : "Показать"}
+                                >
+                                  <Icon name={revealedPasswords.includes(a.id) ? "EyeOff" : "Eye"} size={13} />
+                                </button>
+                                <button
+                                  onClick={() => navigator.clipboard?.writeText(a.password)}
+                                  className="text-gray-500 hover:text-purple-400 transition-colors"
+                                  title="Скопировать"
+                                >
+                                  <Icon name="Copy" size={13} />
+                                </button>
+                              </div>
+                            </div>
+                            <p className="text-gray-600 text-xs flex items-center gap-1.5">
+                              <Icon name="AlertTriangle" size={11} />
+                              Сохраните данные — после смены пароля они станут недействительны
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
