@@ -19,8 +19,8 @@ const accounts = [
     badge: "ТОП",
     discount: 35,
     image: CARD_IMAGE,
-    login: "pro_gamer_x_2019",
-    password: "Qw3rty!9821",
+    login: "fgghnnd",
+    password: "hfbbj",
   },
   {
     id: 2,
